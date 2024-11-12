@@ -7,24 +7,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("api")
-public class HelloWorldController {
-
+@RequestMapping("auth")
+public class AuthController {
     @Autowired
     private AuthService authService;
 
-    @GetMapping
-    public String getHelloWorld() {
-        return "Hello, world!";
+    @PostMapping("/register")
+    public AuthUser register(@RequestBody AuthUserModel user) {
+        return authService.register(user);
     }
 
     @GetMapping("/user")
     public String getUser() {
         return "Debkanta";
-    }
-
-    @PostMapping("/register")
-    public AuthUser register(@RequestBody AuthUserModel user) {
-        return authService.register(user);
     }
 }
