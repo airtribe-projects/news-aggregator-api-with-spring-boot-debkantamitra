@@ -18,11 +18,18 @@ public class WebSecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.authorizeHttpRequests(authorizedRequests -> authorizedRequests
-                .requestMatchers( "/api/*", "/h2-console", "/api/register")
-                .permitAll()
-                .anyRequest()
-                .authenticated());
+        http
+                // CSRF configuration
+                .csrf(csrf -> csrf
+                        .ignoringRequestMatchers("/h2-console/**", "/api/**", "/api-v2/**")) // Disable CSRF for H2 and API endpoints
+                // Authorization configuration
+                .authorizeHttpRequests(authorizedRequests -> authorizedRequests
+                        .requestMatchers("/h2-console/**", "/api/**", "/api-v2/**").permitAll()  // Allow access to specific endpoints
+                        .anyRequest().authenticated())  // All other requests require authentication
+                .formLogin(formLogin -> formLogin
+                        .defaultSuccessUrl("/hello_world", true))  // Redirect after successful login
+                // H2 console configuration
+                .headers(headers -> headers.frameOptions().sameOrigin());  // Allow frames for H2 console
 
         return http.build();
     }

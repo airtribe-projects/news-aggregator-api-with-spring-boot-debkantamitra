@@ -9,7 +9,6 @@ import lombok.Setter;
 import java.util.Date;
 
 @Entity
-@AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
@@ -23,4 +22,12 @@ public class VerificationToken {
     @OneToOne
     @JoinColumn(name = "userId")
     private AuthUser user;
+
+    public VerificationToken(String token, AuthUser user) {
+        long milis = System.currentTimeMillis() + 24 * 60 * 60 * 1000;
+
+        this.token = token;
+        this.expirationDate = new Date(milis);
+        this.user = user;
+    }
 }

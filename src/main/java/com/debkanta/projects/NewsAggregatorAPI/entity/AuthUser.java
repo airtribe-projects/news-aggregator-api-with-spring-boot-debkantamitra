@@ -21,7 +21,7 @@ public class AuthUser {
     @Email
     private String email;
 
-    @Column(length = 10)
+    @Column(length = 60)
     private String password;
 
     private boolean isEnabled;
