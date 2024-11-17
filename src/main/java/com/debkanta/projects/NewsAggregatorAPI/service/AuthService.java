@@ -1,12 +1,16 @@
 package com.debkanta.projects.NewsAggregatorAPI.service;
 
+import com.debkanta.projects.NewsAggregatorAPI.JwtUtil.JwtUtil;
 import com.debkanta.projects.NewsAggregatorAPI.entity.AuthUser;
 import com.debkanta.projects.NewsAggregatorAPI.entity.VerificationToken;
 import com.debkanta.projects.NewsAggregatorAPI.model.AuthUserModel;
 import com.debkanta.projects.NewsAggregatorAPI.repository.AuthUserRepository;
 import com.debkanta.projects.NewsAggregatorAPI.repository.VerificationTokenRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -59,6 +63,36 @@ public class AuthService implements UserDetailsService {
         verificationTokenRepository.delete(verificationToken);
 
         return user.isEnabled();
+    }
+
+    public String signin(String email, String password) {
+        AuthUser user = authUserRepository.findByEmail(email);
+
+        if(user == null || !user.isEnabled()) {
+            return "Failed to authenticate user";
+        }
+
+        boolean isAuthenticated = authenticateUser(user, password);
+
+        if(isAuthenticated) {
+            return JwtUtil.generateToken(user.getEmail());
+        } else {
+            return "Failed to authenticate user";
+        }
+    }
+
+    private boolean authenticateUser(AuthUser user, String password) {
+        boolean doesPasswordMatch = passwordEncoder.matches(password, user.getPassword());
+
+        if(!doesPasswordMatch) return false;
+
+        UserDetails loadedUser = loadUserByUsername(user.getEmail());
+
+        Authentication authentication = new UsernamePasswordAuthenticationToken(loadedUser, password, loadedUser.getAuthorities());
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        return true;
     }
 
     @Override

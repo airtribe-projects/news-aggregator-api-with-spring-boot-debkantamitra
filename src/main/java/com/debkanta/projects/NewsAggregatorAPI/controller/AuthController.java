@@ -43,4 +43,8 @@ public class AuthController {
         }
     }
 
+    @PostMapping("/signin")
+    public String signin(@RequestParam String email, @RequestParam String password) {
+        return authService.signin(email, password);
+    }
 }
